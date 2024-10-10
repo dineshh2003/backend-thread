@@ -1,45 +1,8 @@
-import { ApolloServer } from '@apollo/server';
+import createApolloGraphqlServer from './graphql';
 import { expressMiddleware } from '@apollo/server/express4';
 import express from 'express';
 import http from 'http';
 import { json } from 'body-parser';
-import { prismaClient } from './lib/db';
-
-// Define your GraphQL schema
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-    say(name : String) : String
-  },
-  type Mutation {
-        createUser(firstName : String!, lastName: String!, email: String!, password: String!): Boolean
-  }
-`;
-
-// Define your resolvers
-const resolvers = {
-  Query: {
-    hello: () => 'Hello, I am a grapgql server!',
-    say : ( _:any,  {name} : {name : String}) =>(`Hey ${name} , how are you`)
-  },
-
-  Mutation: {
-    createUser : async (_:any, 
-        {firstName, lastName , email, password}:
-        {firstName: string; lastName: string, email: string, password:string}
-     ) =>{
-        await prismaClient.user.create({
-            data : {
-                email,
-                firstName,
-                lastName,
-                password,
-                salt: "random_salt_to_hash_password"
-            }
-        })
-     }
-  }
-};
 
 async function init() {
   const app = express();
@@ -48,17 +11,8 @@ async function init() {
   // Create a new HTTP server for Apollo Server
   const httpServer = http.createServer(app);
 
-  // Create an ApolloServer instance
-  const gqlServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-  });
-
-  // Start the Apollo server
-  await gqlServer.start();
-
   // Apply Apollo middleware to handle GraphQL requests
-  app.use('/graphql', json(), expressMiddleware(gqlServer));
+  app.use('/graphql', json(), expressMiddleware(await createApolloGraphqlServer()));
 
   // A basic route to check if the server is running
   app.get('/', (req, res) => {
