@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node build/index.js",
-    "dev" : "tsc-watch --onSuccess \"npm start\""
+    "dev": "tsc-watch --onSuccess \"npm start\""
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.0",
     "apollo-server-express": "^3.13.0",
+    "docker": "^1.0.0",
     "express": "^4.21.1",
     "graphql": "^16.9.0"
   },
