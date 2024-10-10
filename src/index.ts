@@ -3,12 +3,16 @@ import { expressMiddleware } from '@apollo/server/express4';
 import express from 'express';
 import http from 'http';
 import { json } from 'body-parser';
+import { prismaClient } from './lib/db';
 
 // Define your GraphQL schema
 const typeDefs = `#graphql
   type Query {
     hello: String
     say(name : String) : String
+  },
+  type Mutation {
+        createUser(firstName : String!, lastName: String!, email: String!, password: String!): Boolean
   }
 `;
 
@@ -18,6 +22,23 @@ const resolvers = {
     hello: () => 'Hello, I am a grapgql server!',
     say : ( _:any,  {name} : {name : String}) =>(`Hey ${name} , how are you`)
   },
+
+  Mutation: {
+    createUser : async (_:any, 
+        {firstName, lastName , email, password}:
+        {firstName: string; lastName: string, email: string, password:string}
+     ) =>{
+        await prismaClient.user.create({
+            data : {
+                email,
+                firstName,
+                lastName,
+                password,
+                salt: "random_salt_to_hash_password"
+            }
+        })
+     }
+  }
 };
 
 async function init() {
